@@ -7,3 +7,5 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 )
+
+require github.com/sashabaranov/go-openai v1.5.7 // indirect

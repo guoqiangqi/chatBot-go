@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+
+	openai "github.com/sashabaranov/go-openai"
 )
 
 var baseURL = "http://localhost:8080/"
@@ -49,19 +51,23 @@ func main() {
 	fmt.Println(accessToken)
 
 	// request to chatgpt with token
-	chatURL := baseURL + "protected"
+	chatURL := baseURL + "chat"
 	headers["Authorization"] = "Bearer " + accessToken
-	chatPayload := chatbot.ChatPayload{
-		Question: "who are you?",
-	}
 
-	chatPayloadBytes, err := json.Marshal(chatPayload)
-	if err != nil {
-		fmt.Println(err)
-		return
+	// chatPayload type should be  []openai.ChatCompletionMessage
+	chatPayload := []openai.ChatCompletionMessage{
+		{
+			Role:    openai.ChatMessageRoleSystem,
+			Content: "Your name is XiaoZhi.",
+		},
+		{
+			Role:    openai.ChatMessageRoleUser,
+			Content: "What is your name.",
+		},
 	}
+	chatPayloadBytes, _ := json.Marshal(chatPayload)
 
-	req, err := http.NewRequest("POST", chatURL,bytes.NewBuffer(chatPayloadBytes))
+	req, err := http.NewRequest("POST", chatURL, bytes.NewBuffer(chatPayloadBytes))
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -85,12 +91,13 @@ func main() {
 		return
 	}
 
-	var chatResponse chatbot.ChatResponse
+	var chatResponse openai.ChatCompletionResponse
 	err = json.NewDecoder(resp.Body).Decode(&chatResponse)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	fmt.Println(chatResponse.Answer)
+	fmt.Println(chatResponse.Usage)
+	fmt.Println(chatResponse.Choices[0].Message)
 }

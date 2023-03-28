@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	openai "github.com/sashabaranov/go-openai"
 	"github.com/gorilla/mux"
 )
 
@@ -53,9 +54,10 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func protectedHandler(w http.ResponseWriter, r *http.Request) {
+func chatHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
+	// Verify the JWT token from http header.
 	authHeader := r.Header.Get("Authorization")
 	const bearerPrefix = "Bearer "
 	if authHeader == "" || !strings.HasPrefix(authHeader, bearerPrefix) {
@@ -87,8 +89,22 @@ func protectedHandler(w http.ResponseWriter, r *http.Request) {
 	username := claims.StandardClaims.Subject
 	fmt.Println("Hello, ", username)
 
-	chatResponse := chatbot.ChatResponse{
-		Answer: "Receive your question, handling...",
+	// handling chat and responsing answer of question.
+	var chatPayload []openai.ChatCompletionMessage
+	err = json.NewDecoder(r.Body).Decode(&chatPayload)
+	// fmt.Println(chatPayload.Question)
+
+	chatResponse, err := chatbot.ChatCompletion(chatPayload, openai.GPT3Dot5Turbo)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest )
+		errorResponse := chatbot.ErrorResponse{
+			ErrorMessage: fmt.Sprintf("Failed with chatbot.ChatCompletion: %s", err),
+		}
+
+		jsonData, _ := json.Marshal(errorResponse)
+		w.Write(jsonData)
+		return
 	}
 
 	jsonData, _ := json.Marshal(chatResponse)
@@ -99,7 +115,7 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/auth", authHandler).Methods("POST")
-	router.HandleFunc("/protected", protectedHandler).Methods("POST")
+	router.HandleFunc("/chat", chatHandler).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
