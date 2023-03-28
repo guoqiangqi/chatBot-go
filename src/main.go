@@ -4,6 +4,7 @@ import (
 	chatbot "chatbot/utils"
 	"fmt"
 	"log"
+	"strings"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -26,7 +27,15 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func protectedHandler(w http.ResponseWriter, r *http.Request) {
-	tokenString := r.Header.Get("Authorization")[7:]
+	authHeader := r.Header.Get("Authorization")
+	const bearerPrefix = "Bearer "
+	if authHeader == "" || !strings.HasPrefix(authHeader, bearerPrefix) {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintln(w, "Wrong token: empty or not start with Bearer.")
+		return
+	}
+
+	tokenString := authHeader[len(bearerPrefix):]
 	claims, err := chatbot.ParseToken(tokenString, jwtSecreteKey)
 
 	if err != nil {
