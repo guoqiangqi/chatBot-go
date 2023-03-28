@@ -7,14 +7,17 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
+	"bufio"
 
 	openai "github.com/sashabaranov/go-openai"
 )
 
 var baseURL = "http://localhost:8080/"
 
-var headers = map[string]string{
+var headers = map[string]string {
 	"Content-Type": "application/json",
+	"Accept": "text/event-stream",
 }
 
 func main() {
@@ -51,7 +54,7 @@ func main() {
 	fmt.Println(accessToken)
 
 	// request to chatgpt with token
-	chatCompletionURL := baseURL + "chatCompletion"
+	chatCompletionStreamURL := baseURL + "chatCompletionStream"
 	headers["Authorization"] = "Bearer " + accessToken
 
 	// chatPayload type should be  []openai.ChatCompletionMessage
@@ -67,7 +70,7 @@ func main() {
 	}
 	chatPayloadBytes, _ := json.Marshal(chatPayload)
 
-	req, err := http.NewRequest("POST", chatCompletionURL, bytes.NewBuffer(chatPayloadBytes))
+	req, err := http.NewRequest("POST", chatCompletionStreamURL, bytes.NewBuffer(chatPayloadBytes))
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -91,13 +94,18 @@ func main() {
 		return
 	}
 
-	var chatResponse openai.ChatCompletionResponse
-	err = json.NewDecoder(resp.Body).Decode(&chatResponse)
-	if err != nil {
-		fmt.Println(err)
-		return
+	reader := bufio.NewReader(resp.Body)
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("Finish stream.")
+			return
+		}
+		line = strings.TrimSuffix(line, "\n")
+		if strings.HasPrefix(line, "data:") {
+			data := strings.TrimSpace(strings.TrimPrefix(line, "data:"))
+			fmt.Println(data)
+		}
 	}
 
-	fmt.Println(chatResponse.Usage)
-	fmt.Println(chatResponse.Choices[0].Message)
 }

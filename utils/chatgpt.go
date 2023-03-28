@@ -28,7 +28,7 @@ func ChatCompletion(messages []openai.ChatCompletionMessage, model string) (open
 	return resp, nil
 }
 
-func ChatCompletionStream(messages []openai.ChatCompletionMessage, model string) (openai.ChatCompletionStream, error) {
+func ChatCompletionStream(messages []openai.ChatCompletionMessage, model string) (*openai.ChatCompletionStream, error) {
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	client := openai.NewClient(apiKey)
 
@@ -42,9 +42,9 @@ func ChatCompletionStream(messages []openai.ChatCompletionMessage, model string)
 	)
 	if err != nil {
 		fmt.Println("ChatCompletionStream error: ", err)
-		return *stream, err
+		return stream, err
 	}
-	defer stream.Close()
+	// defer stream.Close()
 
-	return *stream, nil
+	return stream, nil
 }

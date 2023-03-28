@@ -7,9 +7,11 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"errors"
+	"io"
 
-	openai "github.com/sashabaranov/go-openai"
 	"github.com/gorilla/mux"
+	openai "github.com/sashabaranov/go-openai"
 )
 
 var jwtSecreteKey = []byte("change your secret key here.")
@@ -54,68 +56,106 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func chatHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func chatCompletionHandler(stream bool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		// Verify the JWT token from http header.
+		authHeader := r.Header.Get("Authorization")
+		const bearerPrefix = "Bearer "
+		if authHeader == "" || !strings.HasPrefix(authHeader, bearerPrefix) {
+			w.WriteHeader(http.StatusUnauthorized)
+			errorResponse := chatbot.ErrorResponse{
+				ErrorMessage: "Invalid token: empty or not starts with 'Bearer '",
+			}
 
-	// Verify the JWT token from http header.
-	authHeader := r.Header.Get("Authorization")
-	const bearerPrefix = "Bearer "
-	if authHeader == "" || !strings.HasPrefix(authHeader, bearerPrefix) {
-		w.WriteHeader(http.StatusUnauthorized)
-		errorResponse := chatbot.ErrorResponse{
-			ErrorMessage: "Invalid token: empty or not starts with 'Bearer '",
+			jsonData, _ := json.Marshal(errorResponse)
+			w.Write(jsonData)
+			return
 		}
 
-		jsonData, _ := json.Marshal(errorResponse)
-		w.Write(jsonData)
-		return
-	}
+		tokenString := authHeader[len(bearerPrefix):]
+		claims, err := chatbot.ParseToken(tokenString, jwtSecreteKey)
 
-	tokenString := authHeader[len(bearerPrefix):]
-	claims, err := chatbot.ParseToken(tokenString, jwtSecreteKey)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			errorResponse := chatbot.ErrorResponse{
+				ErrorMessage: "Invalid token: expired or fake token.",
+			}
 
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		errorResponse := chatbot.ErrorResponse{
-			ErrorMessage: "Invalid token: expired or fake token.",
+			jsonData, _ := json.Marshal(errorResponse)
+			w.Write(jsonData)
+			return
 		}
 
-		jsonData, _ := json.Marshal(errorResponse)
-		w.Write(jsonData)
-		return
-	}
+		// username := chatbot.IndexUserWithID(claims.Id).Name
+		username := claims.StandardClaims.Subject
+		fmt.Println("Hello, ", username)
 
-	// username := chatbot.IndexUserWithID(claims.Id).Name
-	username := claims.StandardClaims.Subject
-	fmt.Println("Hello, ", username)
+		// handling chat and responsing answer of question.
+		var chatPayload []openai.ChatCompletionMessage
+		err = json.NewDecoder(r.Body).Decode(&chatPayload)
+		// fmt.Println(chatPayload.Question)
 
-	// handling chat and responsing answer of question.
-	var chatPayload []openai.ChatCompletionMessage
-	err = json.NewDecoder(r.Body).Decode(&chatPayload)
-	// fmt.Println(chatPayload.Question)
+		if stream {
+			completionStream, err := chatbot.ChatCompletionStream(chatPayload, openai.GPT3Dot5Turbo)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				errorResponse := chatbot.ErrorResponse{
+					ErrorMessage: fmt.Sprintf("Failed with chatbot.ChatCompletion: %s", err),
+				}
 
-	chatResponse, err := chatbot.ChatCompletion(chatPayload, openai.GPT3Dot5Turbo)
+				jsonData, _ := json.Marshal(errorResponse)
+				w.Write(jsonData)
+				return
+			}
 
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest )
-		errorResponse := chatbot.ErrorResponse{
-			ErrorMessage: fmt.Sprintf("Failed with chatbot.ChatCompletion: %s", err),
+			w.Header().Set("Content-Type", "text/event-stream")
+			w.Header().Set("Cache-Control", "no-cache")
+
+			for {
+				response, err := completionStream.Recv()
+			
+				if errors.Is(err, io.EOF) {
+					fmt.Println("Stream finished")
+					return
+				}
+				if err != nil {
+					fmt.Println("Stream error: ", err)
+					return
+				}
+
+				fmt.Println(response.Choices[0].Delta.Content)
+				fmt.Fprintf(w, "event: message\ndata: %s\n\n", response.Choices[0].Delta.Content)
+				if f, ok := w.(http.Flusher); ok {
+					f.Flush()
+				}
+			}
+
+		} else {
+			chatResponse, err := chatbot.ChatCompletion(chatPayload, openai.GPT3Dot5Turbo)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				errorResponse := chatbot.ErrorResponse{
+					ErrorMessage: fmt.Sprintf("Failed with chatbot.ChatCompletion: %s", err),
+				}
+
+				jsonData, _ := json.Marshal(errorResponse)
+				w.Write(jsonData)
+				return
+			}
+
+			jsonData, _ := json.Marshal(chatResponse)
+			w.Write(jsonData)
 		}
-
-		jsonData, _ := json.Marshal(errorResponse)
-		w.Write(jsonData)
-		return
 	}
-
-	jsonData, _ := json.Marshal(chatResponse)
-	w.Write(jsonData)
 }
 
 func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/auth", authHandler).Methods("POST")
-	router.HandleFunc("/chat", chatHandler).Methods("POST")
+	router.HandleFunc("/chatCompletion", chatCompletionHandler(false)).Methods("POST")
+	router.HandleFunc("/chatCompletionStream", chatCompletionHandler(true)).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
