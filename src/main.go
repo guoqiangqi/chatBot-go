@@ -98,6 +98,7 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 
 		if stream {
 			completionStream, err := chatbot.ChatCompletionStream(chatPayload, openai.GPT3Dot5Turbo)
+			defer completionStream.Close()
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
 				errorResponse := chatbot.ErrorResponse{
