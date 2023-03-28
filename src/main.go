@@ -2,10 +2,11 @@ package main
 
 import (
 	chatbot "chatbot/utils"
+	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -13,25 +14,58 @@ import (
 var jwtSecreteKey = []byte("change your secret key here.")
 
 func authHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	username := r.FormValue("username")
 	password := r.FormValue("password")
+	if username == "" || password == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		errorResponse := chatbot.ErrorResponse{
+			ErrorMessage: "Authentication failed: cannot find username/password in request body.",
+		}
+
+		jsonData, _ := json.Marshal(errorResponse)
+		w.Write(jsonData)
+		return
+	}
+
 	user := chatbot.Authenticate(username, password)
 
 	if user != nil {
 		tokenString, _ := chatbot.GenerateToken(user.Id, jwtSecreteKey)
-		fmt.Fprintln(w, tokenString)
+		fmt.Println("Authenticate successfully: ", user.Name)
+		fmt.Println("Generate token successfully: ", tokenString)
+
+		authResponse := chatbot.AuthResponse{
+			AccessToken: tokenString,
+		}
+		jsonData, _ := json.Marshal(authResponse)
+		w.Write(jsonData)
+
 	} else {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintln(w, "Authentication failed")
+		errorResponse := chatbot.ErrorResponse{
+			ErrorMessage: "Authentication failed: cannot authenticate with provided username and password.",
+		}
+
+		jsonData, _ := json.Marshal(errorResponse)
+		w.Write(jsonData)
 	}
 }
 
 func protectedHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	authHeader := r.Header.Get("Authorization")
 	const bearerPrefix = "Bearer "
 	if authHeader == "" || !strings.HasPrefix(authHeader, bearerPrefix) {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintln(w, "Wrong token: empty or not start with Bearer.")
+		errorResponse := chatbot.ErrorResponse{
+			ErrorMessage: "Invalid token: empty or not starts with 'Bearer '",
+		}
+
+		jsonData, _ := json.Marshal(errorResponse)
+		w.Write(jsonData)
 		return
 	}
 
@@ -40,13 +74,25 @@ func protectedHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintln(w, "Invalid token")
+		errorResponse := chatbot.ErrorResponse{
+			ErrorMessage: "Invalid token: expired or fake token.",
+		}
+
+		jsonData, _ := json.Marshal(errorResponse)
+		w.Write(jsonData)
 		return
 	}
 
 	// username := chatbot.IndexUserWithID(claims.Id).Name
-    username := claims.StandardClaims.Subject
-	fmt.Fprintf(w, "Hello, %s!", username)
+	username := claims.StandardClaims.Subject
+	fmt.Println("Hello, ", username)
+
+	chatResponse := chatbot.ChatResponse{
+		Answer: "Receive your question, handling...",
+	}
+
+	jsonData, _ := json.Marshal(chatResponse)
+	w.Write(jsonData)
 }
 
 func main() {
