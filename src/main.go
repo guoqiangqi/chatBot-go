@@ -3,12 +3,12 @@ package main
 import (
 	chatbot "chatbot/utils"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
-	"errors"
-	"io"
 
 	"github.com/gorilla/mux"
 	openai "github.com/sashabaranov/go-openai"
@@ -97,8 +97,12 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 		// fmt.Println(chatPayload.Question)
 
 		if stream {
-			completionStream, err := chatbot.ChatCompletionStream(chatPayload, openai.GPT3Dot5Turbo)
+			// completionStream, err := chatbot.ChatCompletionStream(chatPayload, openai.GPT3Dot5Turbo)
+			chatWorkFunc := chatbot.ExponentialBackOff(&chatbot.ChatCompletionStreamFunc{}, 1.0, 2.0, 1.0, 5, []error{&openai.RequestError{}})
+			resp, err := chatWorkFunc(chatPayload, openai.GPT3Dot5Turbo)
+			completionStream, _ := resp.(*openai.ChatCompletionStream)
 			defer completionStream.Close()
+
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
 				errorResponse := chatbot.ErrorResponse{
@@ -115,7 +119,7 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 
 			for {
 				response, err := completionStream.Recv()
-			
+
 				if errors.Is(err, io.EOF) {
 					fmt.Println("Stream finished")
 					return
@@ -133,7 +137,14 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 			}
 
 		} else {
-			chatResponse, err := chatbot.ChatCompletion(chatPayload, openai.GPT3Dot5Turbo)
+			// Rate limit for free account to use gpt-3.5-turbo is 20 per min,
+			// set a exponential backoff here instead of original request to avoid reaching the limit:
+			//
+			// chatResponse, err := chatbot.ChatCompletion(chatPayload, openai.GPT3Dot5Turbo)
+			//
+			chatWorkFunc := chatbot.ExponentialBackOff(&chatbot.ChatCompletionFunc{}, 1.0, 2.0, 1.0, 5, []error{&openai.RequestError{}})
+			chatResponse, err := chatWorkFunc(chatPayload, openai.GPT3Dot5Turbo)
+
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
 				errorResponse := chatbot.ErrorResponse{
