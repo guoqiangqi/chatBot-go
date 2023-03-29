@@ -98,7 +98,7 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 
 		if stream {
 			// completionStream, err := chatbot.ChatCompletionStream(chatPayload, openai.GPT3Dot5Turbo)
-			chatWorkFunc := chatbot.ExponentialBackOff(&chatbot.ChatCompletionStreamFunc{}, 1.0, 2.0, 1.0, 5, []error{&openai.RequestError{}})
+			chatWorkFunc := chatbot.ExponentialBackOff(&chatbot.ChatCompletionStreamFunc{}, 1.0, 2.0, 1.0, 5)
 			resp, err := chatWorkFunc(chatPayload, openai.GPT3Dot5Turbo)
 			completionStream, _ := resp.(*openai.ChatCompletionStream)
 			defer completionStream.Close()
@@ -142,7 +142,7 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 			//
 			// chatResponse, err := chatbot.ChatCompletion(chatPayload, openai.GPT3Dot5Turbo)
 			//
-			chatWorkFunc := chatbot.ExponentialBackOff(&chatbot.ChatCompletionFunc{}, 1.0, 2.0, 1.0, 5, []error{&openai.RequestError{}})
+			chatWorkFunc := chatbot.ExponentialBackOff(&chatbot.ChatCompletionFunc{}, 1.0, 2.0, 1.0, 5)
 			chatResponse, err := chatWorkFunc(chatPayload, openai.GPT3Dot5Turbo)
 
 			if err != nil {

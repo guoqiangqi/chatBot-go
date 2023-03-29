@@ -33,9 +33,9 @@ func (ccsf *ChatCompletionStreamFunc) DoChatWork(messages []openai.ChatCompletio
 
 // ExponentialBackOff is a function that implements exponential backoff algorithm.
 // It returns an error when the maximum number of retries is reached.
-func ExponentialBackOff(cwf ChatWorkFunc, initialDelay float64, exponentialBase float64, jitter float64, maxRetries int, errors []error) func(messages []openai.ChatCompletionMessage, model string) (interface{}, interface{}) {
+func ExponentialBackOff(cwf ChatWorkFunc, initialDelay float64, exponentialBase float64, jitter float64, maxRetries int /*, errors []error*/) func(messages []openai.ChatCompletionMessage, model string) (interface{}, interface{}) {
 	return func(messages []openai.ChatCompletionMessage, model string) (interface{}, interface{}) {
-		
+
 		res, err := cwf.DoChatWork(messages, model)
 		if err == nil {
 			return res, nil
@@ -48,14 +48,20 @@ func ExponentialBackOff(cwf ChatWorkFunc, initialDelay float64, exponentialBase 
 				return res, nil
 			}
 
-			isProvidedError := false
-			for _, value := range errors {
-				if value == err {
-					isProvidedError = true
-					break
-				}
-			}
+			/*
+				// TODO: Optimize error checking here:
+				// Due to the lack of unified error management for openai RESTful API in the go-openai,
+				// error checking is temporarily disabled here.
 
+				isProvidedError := false
+				for _, value := range errors {
+					if value == err {
+						isProvidedError = true
+						break
+					}
+				}
+			*/
+			isProvidedError := true
 			if isProvidedError {
 				rand.Seed(time.Now().UnixNano())
 				delay *= exponentialBase * (1.0 + jitter*rand.Float64())
