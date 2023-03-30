@@ -27,14 +27,8 @@
     Content-Type: application/json
 
     {
-		{
-			Role:    openai.ChatMessageRoleSystem,
-			Content: "Your name is XiaoZhi.",
-		},
-		{
-			Role:    openai.ChatMessageRoleUser,
-			Content: "What is your name.",
-		},
+		"role": "user",
+        "Content": "What is your name."
 	}
     ```
     Notice: If you need to make requests against protected `/chatCompletionStream` endpoints, make "Accept" of http header be "text/event-stream".
