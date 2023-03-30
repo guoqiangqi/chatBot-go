@@ -60,10 +60,6 @@ func main() {
 	// chatPayload type should be  []openai.ChatCompletionMessage
 	chatPayload := []openai.ChatCompletionMessage{
 		{
-			Role:    openai.ChatMessageRoleSystem,
-			Content: "Your name is XiaoZhi.",
-		},
-		{
 			Role:    openai.ChatMessageRoleUser,
 			Content: "What is your name.",
 		},

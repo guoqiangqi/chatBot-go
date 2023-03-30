@@ -93,7 +93,14 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 
 		// handling chat and responsing answer of question.
 		var chatPayload []openai.ChatCompletionMessage
+		systemPayload := []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleSystem,
+				Content: "You are the openEuler community assistant, your name is XiaoZhi.",
+			},
+		}
 		err = json.NewDecoder(r.Body).Decode(&chatPayload)
+		chatPayload = append(systemPayload, chatPayload...)
 		// fmt.Println(chatPayload.Question)
 
 		if stream {
