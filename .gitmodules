@@ -1,0 +1,3 @@
+[submodule "chatBot-py"]
+	path = chatBot-py
+	url = https://github.com/guoqiangqi/chatBot-py.git
