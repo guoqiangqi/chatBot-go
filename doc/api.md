@@ -42,9 +42,9 @@
         ```bash
         Status:  401 Unauthorized
 
-            {
-            "errorMessage": "Authentication failed: cannot authenticate with provided username and password."
-            }
+         {
+         "errorMessage": "Authentication failed: cannot authenticate with provided username and password."
+         }
         ```
 
 ## Request to protected endpoints with token
@@ -122,27 +122,27 @@
 
     * Incorrect token format or not set:
         ```bash
-            Status:  401 Unauthorized
+         Status:  401 Unauthorized
 
-            {
-            "errorMessage": "Invalid token: empty or not starts with 'Bearer '"
-            }
+         {
+         "errorMessage": "Invalid token: empty or not starts with 'Bearer '"
+         }
         ```
     * Forged token or has been expired:
         ```bash
-            Status:  401 Unauthorized
+         Status:  401 Unauthorized
 
-            {
-            "errorMessage": "Invalid token: expired or fake token."
-            }
+         {
+         "errorMessage": "Invalid token: expired or fake token."
+         }
         ```
     * Issues caused by internal programs or network problems on the server side:
         ```bash
-            Status:  500 InternalServerError
+         Status:  500 InternalServerError
 
-            {
-            "errorMessage": "Failed with chatbot.ChatCompletion: {error}"
-            }
+         {
+         "errorMessage": "Failed with chatbot.ChatCompletion: {error}"
+         }
         ```
 
 **Notice:** For other network issues, refer to the general Http protocol.
