@@ -111,7 +111,7 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 			defer completionStream.Close()
 
 			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
+				w.WriteHeader(http.StatusInternalServerError)
 				errorResponse := chatbot.ErrorResponse{
 					ErrorMessage: fmt.Sprintf("Failed with chatbot.ChatCompletion: %s", err),
 				}
@@ -153,7 +153,7 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 			chatResponse, err := chatWorkFunc(chatPayload, openai.GPT3Dot5Turbo)
 
 			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
+				w.WriteHeader(http.StatusInternalServerError)
 				errorResponse := chatbot.ErrorResponse{
 					ErrorMessage: fmt.Sprintf("Failed with chatbot.ChatCompletion: %s", err),
 				}
