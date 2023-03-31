@@ -8,7 +8,7 @@ RUN go build -o main src/main.go
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /app
-COPY --from=0 /chatbot-go ./
+COPY --from=0 /chatbot-go/main ./
 CMD ["./main"]
 
 # NOTICE: set OPENAI_API_KEY env variable when run whith docker, just like:
