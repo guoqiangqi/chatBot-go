@@ -14,7 +14,7 @@ metadata:
 spec:
   storageClassName: local-storage
   claimRef:
-    name: postgres-pv-claim
+    name: postgres-pvc
   capacity:
     storage: 50Gi
   accessModes:
