@@ -3,9 +3,38 @@ package chatbot
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	_ "github.com/lib/pq"
 )
+
+var (
+	dbHost      = os.Getenv("PGSQL_HOST")
+	dbPort      = os.Getenv("PGSQL_PORT")
+	dbUser      = os.Getenv("PGSQL_USER")
+	dbPassword  = os.Getenv("PGSQL_PASSWORD")
+	dbName      = os.Getenv("PGSQL_DBNAME")
+	dbTablename = os.Getenv("PGSQL_TABLENAME")
+)
+
+func WriteQAToDB(question string, answer string) error {
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		dbHost, dbPort, dbUser, dbPassword, dbName)
+
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	_, err = TableInit(db, dbTablename)
+	if err != nil {
+		return err
+	}
+
+	_, err = InsertData(db, dbTablename, question, answer)
+	return err
+}
 
 func CreateTable(db *sql.DB, tablename string) (bool, error) {
 	createTableSQL := fmt.Sprintf(`
