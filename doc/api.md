@@ -50,8 +50,8 @@
 ## Request to protected endpoints with token
 1. Token received can then be used to make requests against protected `/chatCompletion` or `/chatCompletionStream` endpoints:
     ```bash
-    GET /chatCompletion HTTP/1.1
-    Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGl0eSI6MSwiaWF0IjoxNDQ0OTE3NjQwLCJuYmYiOjE0NDQ5MTc2NDAsImV4cCI6MTQ0NDkxNzk0MH0.KPmI6WSjRjlpzecPvs3q_T
+    POST /chatCompletion HTTP/1.1
+    Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGl0eSI6MSwiaWF0IjoxNDQ0OTE3NjQwLCJuYmYiOjE0NDQ5MTc2NDAsImV4cCI6MTQ0NDkxNzk0MH0.KPmI6WSjRjlpzecPvs3q_T
     Content-Type: application/json
 
     {
