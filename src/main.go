@@ -102,6 +102,8 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 		err = json.NewDecoder(r.Body).Decode(&chatPayload)
 		chatPayload = append(systemPayload, chatPayload...)
 		// fmt.Println(chatPayload.Question)
+		question := chatPayload[len(chatPayload)-1].Content
+		answer := ""
 
 		if stream {
 			// completionStream, err := chatbot.ChatCompletionStream(chatPayload, openai.GPT3Dot5Turbo)
@@ -129,6 +131,12 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 
 				if errors.Is(err, io.EOF) {
 					fmt.Println("Stream finished")
+
+					err = chatbot.WriteQAToDB(question, answer)
+					if err != nil {
+						fmt.Println(err)
+					}
+
 					return
 				}
 				if err != nil {
@@ -136,7 +144,8 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 					return
 				}
 
-				fmt.Println(response.Choices[0].Delta.Content)
+				// fmt.Println(response.Choices[0].Delta.Content)
+				answer += response.Choices[0].Delta.Content
 				fmt.Fprintf(w, "event: message\ndata: %s\n\n", response.Choices[0].Delta.Content)
 				if f, ok := w.(http.Flusher); ok {
 					f.Flush()
@@ -164,7 +173,14 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 			}
 
 			jsonData, _ := json.Marshal(chatResponse)
+			res := chatResponse.(openai.ChatCompletionResponse)
+			answer = res.Choices[0].Message.Content
 			w.Write(jsonData)
+		}
+
+		err = chatbot.WriteQAToDB(question, answer)
+		if err != nil {
+			fmt.Println(err)
 		}
 	}
 }
