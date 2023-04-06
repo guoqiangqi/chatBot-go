@@ -33,9 +33,9 @@ spec:
         - name: PGSQL_HOST
           value: "xx"
         - name: PGSQL_PORT
-          value: 5432
+          value: "5432"
         - name: PGSQL_USER
-          vaulue: "xx"
+          value: "xx"
         - name: PGSQL_PASSWORD
           value: "xxx"
         - name: PGSQL_DBNAME
