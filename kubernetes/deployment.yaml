@@ -30,3 +30,15 @@ spec:
         env:
         - name: OPENAI_API_KEY
           value: "YOUR SERCRET KEY"
+        - name: PGSQL_HOST
+          value: "xx"
+        - name: PGSQL_PORT
+          value: 5432
+        - name: PGSQL_USER
+          vaulue: "xx"
+        - name: PGSQL_PASSWORD
+          value: "xxx"
+        - name: PGSQL_DBNAME
+          value: "postgresdb"
+        - name: PGSQL_TABLENAME
+          value: "chatbot"
