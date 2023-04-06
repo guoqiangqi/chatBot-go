@@ -11,9 +11,9 @@ kind: Secret
 metadata:
   name: postgres-secret
 type: Opaque
-data:
+stringData:
   username: admin
-  password: default_password
+  password: default-password
 ---
 apiVersion: apps/v1
 kind: Deployment
