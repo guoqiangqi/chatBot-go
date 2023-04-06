@@ -8,4 +8,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 )
 
-require github.com/sashabaranov/go-openai v1.5.7 // indirect
+require (
+	github.com/lib/pq v1.10.7 // indirect
+	github.com/sashabaranov/go-openai v1.5.7 // indirect
+)
