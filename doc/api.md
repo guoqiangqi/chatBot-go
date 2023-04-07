@@ -54,10 +54,12 @@
     Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGl0eSI6MSwiaWF0IjoxNDQ0OTE3NjQwLCJuYmYiOjE0NDQ5MTc2NDAsImV4cCI6MTQ0NDkxNzk0MH0.KPmI6WSjRjlpzecPvs3q_T
     Content-Type: application/json
 
-    {
+    [
+        {
         "role": "user",
         "Content": "What is your name."
-    }
+        }
+    ]
     ```
     **Notice:** If you need to make requests against protected `/chatCompletionStream` endpoints, make "Accept" of http header be "text/event-stream".
 
