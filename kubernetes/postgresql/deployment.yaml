@@ -13,7 +13,7 @@ metadata:
 type: Opaque
 stringData:
   username: admin
-  password: default-password
+  password: "xx"
 ---
 apiVersion: apps/v1
 kind: Deployment
