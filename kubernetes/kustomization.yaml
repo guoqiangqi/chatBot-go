@@ -4,6 +4,8 @@ namespace: chatbot
 
 resources:
 - namespace.yaml
+- postgresql/volumes.yaml
+- postgresql/deployment.yaml
 - deployment.yaml
 - service.yaml
 - ingress.yaml
