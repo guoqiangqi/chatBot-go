@@ -132,10 +132,11 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 				if errors.Is(err, io.EOF) {
 					log.Println("Stream finished")
 
-					err = chatbot.WriteQAToDB(question, answer)
-					if err != nil {
-						log.Println(err)
-					}
+					// err = chatbot.WriteQAToDB(question, answer)
+					// if err != nil {
+					// 	log.Println(err)
+					// }
+					go chatbot.WriteQAToDB(question, answer)
 
 					return
 				}
@@ -178,10 +179,11 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 			w.Write(jsonData)
 		}
 
-		err = chatbot.WriteQAToDB(question, answer)
-		if err != nil {
-			log.Println(err)
-		}
+		// err = chatbot.WriteQAToDB(question, answer)
+		// if err != nil {
+		// 	log.Println(err)
+		// }
+		go chatbot.WriteQAToDB(question, answer)
 	}
 }
 
