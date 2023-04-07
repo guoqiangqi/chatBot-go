@@ -4,12 +4,16 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-var userList = []*User{NewUser("temporary_user", "default_password", []string{"request"})}
+var defaultUserName = os.Getenv("ADMIN_USERNAME")
+var defaultPassword = os.Getenv("ADMIN_PASSWORD")
+
+var userList = []*User{NewUser(defaultUserName, defaultPassword, []string{"rw"})}
 var usernameTable = map[string]*User{userList[0].Name: userList[0]}
 var useridTable = map[string]*User{userList[0].Id: userList[0]}
 

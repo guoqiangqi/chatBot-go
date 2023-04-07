@@ -28,6 +28,10 @@ spec:
         ports:
         - containerPort: 8080
         env:
+        - name: ADMIN_USERNAME
+          value: "xx"
+        - name: ADMIN_PASSWORD
+          value: "xx"
         - name: OPENAI_API_KEY
           value: "YOUR SERCRET KEY"
         - name: PGSQL_HOST
