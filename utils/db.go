@@ -3,6 +3,7 @@ package chatbot
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 
 	_ "github.com/lib/pq"
@@ -50,7 +51,7 @@ func CreateTable(db *sql.DB, tablename string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	fmt.Println("Table created successfully!")
+	log.Println("Table created successfully!")
 	return true, nil
 }
 
@@ -77,7 +78,7 @@ func InsertData(db *sql.DB, tableName string, question string, answer string) (b
 	if err != nil {
 		return false, err
 	}
-	fmt.Println("Data inserted successfully!")
+	log.Println("Data inserted successfully!")
 	return true, nil
 }
 
@@ -90,7 +91,7 @@ func TableInit(db *sql.DB, tableName string) (bool, error) {
 	if !exists {
 		return CreateTable(db, tableName)
 	} else {
-		fmt.Println("Table is already existed.")
+		log.Println("Table is already existed.")
 	}
 	return true, nil
 }

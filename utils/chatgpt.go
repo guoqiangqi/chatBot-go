@@ -3,6 +3,7 @@ package chatbot
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 
 	openai "github.com/sashabaranov/go-openai"
@@ -21,7 +22,7 @@ func ChatCompletion(messages []openai.ChatCompletionMessage, model string) (open
 	)
 
 	if err != nil {
-		fmt.Println("ChatCompletion error: ", err)
+		log.Println("ChatCompletion error: ", err)
 		return resp, err
 	}
 
@@ -41,7 +42,7 @@ func ChatCompletionStream(messages []openai.ChatCompletionMessage, model string)
 		},
 	)
 	if err != nil {
-		fmt.Println("ChatCompletionStream error: ", err)
+		log.Println("ChatCompletionStream error: ", err)
 		return stream, err
 	}
 	// defer stream.Close()

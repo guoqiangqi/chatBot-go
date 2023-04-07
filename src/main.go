@@ -36,8 +36,8 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 
 	if user != nil {
 		tokenString, _ := chatbot.GenerateToken(user.Id, jwtSecreteKey)
-		fmt.Println("Authenticate successfully: ", user.Name)
-		fmt.Println("Generate token successfully: ", tokenString)
+		log.Println("Authenticate successfully: ", user.Name)
+		log.Println("Generate token successfully: ", tokenString)
 
 		authResponse := chatbot.AuthResponse{
 			AccessToken: tokenString,
@@ -89,7 +89,7 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 
 		// username := chatbot.IndexUserWithID(claims.Id).Name
 		username := claims.StandardClaims.Subject
-		fmt.Println("Hello, ", username)
+		log.Println("Hello, ", username)
 
 		// handling chat and responsing answer of question.
 		var chatPayload []openai.ChatCompletionMessage
@@ -101,7 +101,7 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 		}
 		err = json.NewDecoder(r.Body).Decode(&chatPayload)
 		chatPayload = append(systemPayload, chatPayload...)
-		// fmt.Println(chatPayload.Question)
+		// log.Println(chatPayload.Question)
 		question := chatPayload[len(chatPayload)-1].Content
 		answer := ""
 
@@ -130,21 +130,21 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 				response, err := completionStream.Recv()
 
 				if errors.Is(err, io.EOF) {
-					fmt.Println("Stream finished")
+					log.Println("Stream finished")
 
 					err = chatbot.WriteQAToDB(question, answer)
 					if err != nil {
-						fmt.Println(err)
+						log.Println(err)
 					}
 
 					return
 				}
 				if err != nil {
-					fmt.Println("Stream error: ", err)
+					log.Println("Stream error: ", err)
 					return
 				}
 
-				// fmt.Println(response.Choices[0].Delta.Content)
+				// log.Println(response.Choices[0].Delta.Content)
 				answer += response.Choices[0].Delta.Content
 				fmt.Fprintf(w, "event: message\ndata: %s\n\n", response.Choices[0].Delta.Content)
 				if f, ok := w.(http.Flusher); ok {
@@ -180,7 +180,7 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 
 		err = chatbot.WriteQAToDB(question, answer)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 	}
 }
