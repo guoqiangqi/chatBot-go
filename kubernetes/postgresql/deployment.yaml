@@ -33,7 +33,7 @@ spec:
       #   environment: production
       containers:
       - name: postgres
-        image: postgres:latest
+        image: postgres:alpine3.17
         envFrom:
         - configMapRef:
             name: postgres-config
@@ -46,10 +46,20 @@ spec:
         volumeMounts:
         - name: postgres-storage
           mountPath: /var/lib/postgresql/data
+        - name: timezone-volume
+          mountPath: /etc/timezone
+        - name: localtime-volume
+          mountPath: /etc/localtime
       volumes:
       - name: postgres-storage
         persistentVolumeClaim:
           claimName: postgres-pvc
+      - name: timezone-volume
+        hostPath:
+          path: /etc/timezone
+      - name: localtime-volume
+        hostPath:
+          path: /etc/localtime
 ---
 apiVersion: v1
 kind: Service
