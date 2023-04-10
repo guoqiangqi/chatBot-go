@@ -6,7 +6,7 @@ RUN go build -o main src/main.go
 
 
 FROM alpine:latest
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates && apk add -U tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && apk del tzdata
 WORKDIR /app
 COPY --from=0 /chatbot-go/main ./
 CMD ["./main"]
