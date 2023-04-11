@@ -19,6 +19,15 @@ var jwtSecreteKey = []byte("change your secret key here.")
 func authHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
+	origin := r.Header.Get("Origin")
+    if origin != "" {
+        w.Header().Set("Access-Control-Allow-Origin", origin)
+    }
+
+    w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+    w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 	if username == "" || password == "" {
@@ -59,6 +68,16 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 func chatCompletionHandler(stream bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+
+		origin := r.Header.Get("Origin")
+		if origin != "" {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+		}
+
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
 		// Verify the JWT token from http header.
 		authHeader := r.Header.Get("Authorization")
 		const bearerPrefix = "Bearer "
