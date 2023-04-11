@@ -20,19 +20,7 @@ spec:
             port:
               number: 8080
 
-  - host: YOUR_DOMAIN_NAME02
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: postgres-service
-            port:
-              number: 5432
-
   tls:
   - hosts:
     - YOUR_DOMAIN_NAME01
-    - YOUR_DOMAIN_NAME02
     secretName: chatbot-backend-xxx-xxx-tls
