@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+type: Opaque
+stringData:
+  username: admin
+  password: "xx"
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+data:
+  POSTGRES_USER: admin
+  POSTGRES_DB: postgresdb
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chatbot-backend-config
+data:
+  ADMIN_USERNAME: temporary_user
+  ADMIN_PASSWORD: xx
+  OPENAI_API_KEY: xx
+  PGSQL_HOST: postgres-service
+  PGSQL_PORT: 5432
+  PGSQL_USER: admin
+  PGSQL_PASSWORD: xx
+  PGSQL_DBNAME: postgresdb
+  PGSQL_TABLENAME: chatbot

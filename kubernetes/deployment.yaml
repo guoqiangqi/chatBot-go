@@ -27,22 +27,6 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
-        env:
-        - name: ADMIN_USERNAME
-          value: "xx"
-        - name: ADMIN_PASSWORD
-          value: "xx"
-        - name: OPENAI_API_KEY
-          value: "YOUR SERCRET KEY"
-        - name: PGSQL_HOST
-          value: "xx"
-        - name: PGSQL_PORT
-          value: "5432"
-        - name: PGSQL_USER
-          value: "xx"
-        - name: PGSQL_PASSWORD
-          value: "xxx"
-        - name: PGSQL_DBNAME
-          value: "postgresdb"
-        - name: PGSQL_TABLENAME
-          value: "chatbot"
+        envFrom:
+        - configMapRef:
+            name: chatbot-backend-config
