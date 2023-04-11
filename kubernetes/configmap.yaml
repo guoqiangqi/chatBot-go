@@ -5,7 +5,7 @@ metadata:
 type: Opaque
 stringData:
   username: admin
-  password: "xx"
+  password: xx
 ---
 
 apiVersion: v1
@@ -26,7 +26,7 @@ data:
   ADMIN_PASSWORD: xx
   OPENAI_API_KEY: xx
   PGSQL_HOST: postgres-service
-  PGSQL_PORT: 5432
+  PGSQL_PORT: "5432"
   PGSQL_USER: admin
   PGSQL_PASSWORD: xx
   PGSQL_DBNAME: postgresdb
