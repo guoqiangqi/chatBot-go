@@ -147,4 +147,64 @@
          }
         ```
 
-**Notice:** For other network issues, refer to the general Http protocol.
+**Notice:** For other network issues, refer to the general Http protocol.  
+
+<br />
+
+## Handle SSE stream in ***vue***
+1. Install plugin needed
+    ```bash
+    npm install @microsoft/fetch-event-source
+    ```
+2. fetch EventSource
+    ```js
+    import { fetchEventSource } from '@microsoft/fetch-event-source';
+
+    export function getChatRes (inputText, params) {
+    const { messgae } = params
+    const headers = {
+        'Authorization': 'Bearer' + ' ' + localStorage.getItem('Access-Token') + 5,
+    };
+    const body = JSON.stringify([
+        {
+        role: 'user',
+        Content: inputText
+        }
+    ]);
+    const es = new fetchEventSource('/chatCompletionStream', {
+        method: 'POST',
+        headers,
+        body,
+        async onopen (response) {
+        if (response.ok) {
+            return; // everything's good
+        } else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+            console.log(response.statusText); // handling error
+            // throw new Error(response.statusText);
+        } else {
+            console.log(response.statusText); // handling error
+            throw new Error();
+        }
+        },
+        onmessage (event) {
+        messgae(event.data);
+        },
+        onclose () {
+        // if the server closes the connection unexpectedly, retry:
+        },
+        onerror (err) {
+        console.log(err)
+        throw new Error();
+        }
+    });
+    }
+    ```
+
+3. Call the function
+    ```js
+    getChatRes(this.question, {
+            messgae: (res) => {
+            console.log(res)
+            },
+        })
+    ```
