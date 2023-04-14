@@ -40,6 +40,8 @@ func ChatCompletionStream(messages []openai.ChatCompletionMessage, model string)
 			Stream:   true,
 		},
 	)
+	//FIXME01: can not catch 'exceeded quota error' here, is a issue from upstream client.CreateChatCompletionStream api
+	// but not with client.CreateChatCompletion.
 	if err != nil {
 		log.Println("ChatCompletionStream error: ", err)
 		return stream, err

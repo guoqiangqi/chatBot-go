@@ -1,7 +1,9 @@
 package chatbot
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 
@@ -67,7 +69,9 @@ func ExponentialBackOff(cwf ChatWorkFunc, initialDelay float64, exponentialBase 
 				delay *= exponentialBase * (1.0 + jitter*rand.Float64())
 				time.Sleep(time.Duration(delay) * time.Second)
 			} else {
-				return res, err
+				// return res, err
+				log.Println("ExponentialBackOff faiiled: ", err)
+				return res, errors.New("something wrong with the internal service")
 			}
 		}
 		return res, &MaxRetryError{"ExponentialBackOff faiiled: Maximum number of retries exceeded."}

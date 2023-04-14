@@ -116,7 +116,7 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				errorResponse := chatbot.ErrorResponse{
-					ErrorMessage: fmt.Sprintf("Failed with chatbot.ChatCompletion: %s", err),
+					ErrorMessage: fmt.Sprintf("Failed with chatbot.ChatCompletionStream: %s", err),
 				}
 
 				jsonData, _ := json.Marshal(errorResponse)
@@ -141,8 +141,18 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 
 					return
 				}
+
+				// catch 'exceeded quota error' here, see FIXME01
 				if err != nil {
 					log.Println("Stream error: ", err)
+
+					w.WriteHeader(http.StatusInternalServerError)
+					errorResponse := chatbot.ErrorResponse{
+						ErrorMessage: fmt.Sprintf("Something wrong with the internal service"),
+					}
+
+					jsonData, _ := json.Marshal(errorResponse)
+					w.Write(jsonData)
 					return
 				}
 
