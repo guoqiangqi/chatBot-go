@@ -64,30 +64,12 @@
     **Notice:** If you need to make requests against protected `/chatCompletionStream` endpoints, make "Accept" of http header be "text/event-stream".
 
 2. Requests to the `chatCompletion` endpoint will get the complete content reponese:
-    ```bash
+    ```s
     {
-        "id": "chatcmpl-700IlaB0PJwlSijA6hTIAqOXaiE9E",
-        "object": "chat.completion",
-        "created": 1680235515,
-        "model": "gpt-3.5-turbo-0301",
-        "choices": [
-            {
-                "index": 0,
-                "message": {
-                    "role": "assistant",
-                    "content": "Hello, I am XiaoZhi, the openEuler community assistant. How may I assist you today?"
-                },
-                "finish_reason": "stop"
-            }
-        ],
-        "usage": {
-            "prompt_tokens": 24,
-            "completion_tokens": 22,
-            "total_tokens": 46
-        }
+        "message": "Hello, I am XiaoZhi, the openEuler community assistant. How may I assist you today?"
     }
     ```
-    `choices[0]["message"]["content"]` in the body is the content that needs to be returned by the dialogue.
+    ["message"] in the body is the content that needs to be returned by the dialogue.
 
 3. For the request of `chatCompletionStream` endpoint, the relevant content will be returned through Server-Sent Events (SSE). You need to process the EventSource to obtain all the content. The format of each transmission content is:
     ```bash
