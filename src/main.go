@@ -146,6 +146,7 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 				if err != nil {
 					log.Println("Stream error: ", err)
 
+					w.Header().Set("Content-Type", "application/json")
 					w.WriteHeader(http.StatusInternalServerError)
 					errorResponse := chatbot.ErrorResponse{
 						ErrorMessage: fmt.Sprintf("Something wrong with the internal service"),
