@@ -87,13 +87,12 @@ func main() {
 		return
 	}
 
-	var chatResponse openai.ChatCompletionResponse
+	var chatResponse chatbot.Answer
 	err = json.NewDecoder(resp.Body).Decode(&chatResponse)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	fmt.Println(chatResponse.Usage)
-	fmt.Println(chatResponse.Choices[0].Message)
+	fmt.Println(chatResponse)
 }

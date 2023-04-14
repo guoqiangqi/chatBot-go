@@ -15,3 +15,7 @@ type ChatResponse struct {
 type ErrorResponse struct {
 	ErrorMessage string `json:"errorMessage"`
 }
+
+type Answer struct {
+	Message string `json:"message"`
+}
