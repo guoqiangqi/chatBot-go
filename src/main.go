@@ -110,7 +110,7 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 			// completionStream, err := chatbot.ChatCompletionStream(chatPayload, openai.GPT3Dot5Turbo)
 			chatWorkFunc := chatbot.ExponentialBackOff(&chatbot.ChatCompletionStreamFunc{}, 1.0, 2.0, 1.0, 5)
 			resp, err := chatWorkFunc(chatPayload, openai.GPT3Dot5Turbo)
-			completionStream:= resp.(*openai.ChatCompletionStream)
+			completionStream := resp.(*openai.ChatCompletionStream)
 			defer completionStream.Close()
 
 			if err != nil {
