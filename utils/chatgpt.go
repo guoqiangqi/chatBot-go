@@ -57,7 +57,7 @@ func ChatCompletionStream(messages []openai.ChatCompletionMessage, model string)
 		err = errors.New("get bad response, please retry you http request")
 
 	} else if statusCode == http.StatusUnauthorized {
-		err = errors.New("get bad response, may cased by incorrected API key")
+		err = errors.New("get bad response, may cased by incorrect API key")
 	}
 
 	log.Println("ChatCompletionStream error with status code: ", statusCode)
