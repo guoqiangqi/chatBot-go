@@ -55,8 +55,11 @@ func ChatCompletionStream(messages []openai.ChatCompletionMessage, model string)
 	// Rate limit and quota exceeded would get http.StatusTooManyRequests. Incorrect API key get http.StatusUnauthorized
 	if statusCode == http.StatusTooManyRequests || statusCode == http.StatusRequestTimeout || statusCode >= http.StatusInternalServerError {
 		err = errors.New("get bad response, please retry you http request")
-		log.Println("ChatCompletionStream error with status code: ", statusCode)
+
+	} else if statusCode == http.StatusUnauthorized {
+		err = errors.New("get bad response, may cased by incorrected API key")
 	}
 
+	log.Println("ChatCompletionStream error with status code: ", statusCode)
 	return stream, err
 }
