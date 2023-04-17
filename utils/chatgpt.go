@@ -2,7 +2,9 @@ package chatbot
 
 import (
 	"context"
+	"errors"
 	"log"
+	"net/http"
 	"os"
 
 	openai "github.com/sashabaranov/go-openai"
@@ -48,5 +50,13 @@ func ChatCompletionStream(messages []openai.ChatCompletionMessage, model string)
 	}
 	// defer stream.Close()
 
-	return stream, nil
+	res, _ := stream.GetHttpResponse()
+	statusCode := res.StatusCode
+	// Rate limit and quota exceeded would get http.StatusTooManyRequests. Incorrect API key get http.StatusUnauthorized
+	if statusCode == http.StatusTooManyRequests || statusCode == http.StatusRequestTimeout || statusCode >= http.StatusInternalServerError {
+		err = errors.New("get bad response, please retry you http request")
+		log.Println("ChatCompletionStream error with status code: ", statusCode)
+	}
+
+	return stream, err
 }
