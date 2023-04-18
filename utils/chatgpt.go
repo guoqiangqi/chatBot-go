@@ -14,23 +14,36 @@ import (
 )
 
 func ChatCompletion(messages []openai.ChatCompletionMessage, model string) (openai.ChatCompletionResponse, error) {
-	apiKey := os.Getenv("OPENAI_API_KEY")
-	client := openai.NewClient(apiKey)
+	apiKeyString := os.Getenv("OPENAI_API_KEY")
+	apiKeyList := strings.Split(apiKeyString, "||")
 
-	resp, err := client.CreateChatCompletion(
-		context.Background(),
-		openai.ChatCompletionRequest{
-			Model:    model,
-			Messages: messages,
-		},
-	)
+	var resp openai.ChatCompletionResponse
+	var err error
 
-	if err != nil {
-		log.Println("ChatCompletion error: ", err)
-		return resp, err
+	for len(apiKeyList) != 0 {
+		rand.Seed(time.Now().UnixNano())
+		index := rand.Intn(len(apiKeyList))
+		apiKey := apiKeyList[index]
+		apiKeyList = append(apiKeyList[:index], apiKeyList[index+1:]...)
+
+		log.Println("Request with API token: ", apiKey)
+		client := openai.NewClient(apiKey)
+
+		resp, err = client.CreateChatCompletion(
+			context.Background(),
+			openai.ChatCompletionRequest{
+				Model:    model,
+				Messages: messages,
+			},
+		)
+
+		if err == nil {
+			return resp, nil
+		}
+		log.Println("Request failed: ", err)
 	}
-
-	return resp, nil
+	log.Println("ChatCompletion error: ", err)
+	return resp, err
 }
 
 func ChatCompletionStream(messages []openai.ChatCompletionMessage, model string) (*openai.ChatCompletionStream, error) {
