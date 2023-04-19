@@ -92,15 +92,15 @@ func main() {
 
 	reader := bufio.NewReader(resp.Body)
 	for {
-		line, err := reader.ReadString('\n')
+		line, err := reader.ReadString('\u00A9')
 		if err != nil {
 			fmt.Println("Finish stream.")
 			return
 		}
-		line = strings.TrimSuffix(line, "\n")
+		line = strings.TrimSuffix(line, "\u00A9")
 		if strings.HasPrefix(line, "data:") {
-			data := strings.TrimSpace(strings.TrimPrefix(line, "data:"))
-			fmt.Println(data)
+			data := strings.TrimPrefix(line, "data:")
+			fmt.Print(data)
 		}
 	}
 
