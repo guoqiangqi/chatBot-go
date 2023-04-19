@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	chatbot "chatbot/utils"
 	"encoding/json"
@@ -8,16 +9,15 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"bufio"
 
 	openai "github.com/sashabaranov/go-openai"
 )
 
 var baseURL = "http://localhost:8080/"
 
-var headers = map[string]string {
+var headers = map[string]string{
 	"Content-Type": "application/json",
-	"Accept": "text/event-stream",
+	"Accept":       "text/event-stream",
 }
 
 func main() {
