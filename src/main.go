@@ -144,7 +144,7 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 
 				// log.Println(response.Choices[0].Delta.Content)
 				answer += response.Choices[0].Delta.Content
-				fmt.Fprintf(w, "event: message\ndata: %s\n\n", response.Choices[0].Delta.Content)
+				fmt.Fprintf(w, "event: message\ndata: %q\n\n", response.Choices[0].Delta.Content)
 				if f, ok := w.(http.Flusher); ok {
 					f.Flush()
 				}
