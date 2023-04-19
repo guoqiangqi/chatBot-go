@@ -61,7 +61,7 @@ func main() {
 	chatPayload := []openai.ChatCompletionMessage{
 		{
 			Role:    openai.ChatMessageRoleUser,
-			Content: "What is your name.",
+			Content: "what is your name?",
 		},
 	}
 	chatPayloadBytes, _ := json.Marshal(chatPayload)
@@ -100,7 +100,8 @@ func main() {
 		line = strings.TrimSuffix(line, "\n")
 		if strings.HasPrefix(line, "data:") {
 			data := strings.TrimSpace(strings.TrimPrefix(line, "data:"))
-			fmt.Println(data)
+			data = strings.TrimPrefix(strings.TrimSuffix(data, "\""), "\"")
+			fmt.Print(data)
 		}
 	}
 
