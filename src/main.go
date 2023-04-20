@@ -111,7 +111,6 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 			chatWorkFunc := chatbot.ExponentialBackOff(&chatbot.ChatCompletionStreamFunc{}, 1.0, 2.0, 1.0, 3)
 			resp, err := chatWorkFunc(chatPayload, openai.GPT3Dot5Turbo)
 			completionStream := resp.(*openai.ChatCompletionStream)
-			defer completionStream.Close()
 
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
@@ -123,6 +122,8 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 				w.Write(jsonData)
 				return
 			}
+
+			defer completionStream.Close()
 
 			w.Header().Set("Content-Type", "text/event-stream")
 			w.Header().Set("Cache-Control", "no-cache")
