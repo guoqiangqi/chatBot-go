@@ -45,7 +45,13 @@ func ExponentialBackOff(cwf ChatWorkFunc, initialDelay float64, exponentialBase 
 
 		delay := initialDelay
 		for i := 0; i < maxRetries; i++ {
+
 			log.Println("ExponentialBackOff Retry: ", i)
+			rand.Seed(time.Now().UnixNano())
+			delay *= exponentialBase * (1.0 + jitter*rand.Float64())
+			log.Println("Failed, sleeping time: ", delay)
+			time.Sleep(time.Duration(delay) * time.Second)
+
 			res, err = cwf.DoChatWork(messages, model)
 			if err == nil {
 				return res, nil
@@ -65,12 +71,7 @@ func ExponentialBackOff(cwf ChatWorkFunc, initialDelay float64, exponentialBase 
 				}
 			*/
 			isProvidedError := true
-			if isProvidedError {
-				rand.Seed(time.Now().UnixNano())
-				delay *= exponentialBase * (1.0 + jitter*rand.Float64())
-				log.Println("Failed, sleeping time: ", delay)
-				time.Sleep(time.Duration(delay) * time.Second)
-			} else {
+			if !isProvidedError {
 				// return res, err
 				log.Println("ExponentialBackOff faiiled: ", err)
 				return res, errors.New("something wrong with the internal service")
