@@ -11,18 +11,23 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 )
 
+func getRandomKey(keyList []string) ([]string, string) {
+	rand.Seed(time.Now().UnixNano())
+	index := rand.Intn(len(keyList))
+	apiKey := keyList[index]
+	keyList = append(keyList[:index], keyList[index+1:]...)
+	return keyList, apiKey
+}
+
 func ChatCompletion(messages []openai.ChatCompletionMessage, model string) (openai.ChatCompletionResponse, error) {
-	apiKeyString := os.Getenv("OPENAI_API_KEY")
-	apiKeyList := strings.Split(apiKeyString, "||")
 
 	var resp openai.ChatCompletionResponse
 	var err error
+	var apiKey string
+	var apiKeyList = strings.Split(os.Getenv("OPENAI_API_KEY"), "||")
 
 	for len(apiKeyList) != 0 {
-		rand.Seed(time.Now().UnixNano())
-		index := rand.Intn(len(apiKeyList))
-		apiKey := apiKeyList[index]
-		apiKeyList = append(apiKeyList[:index], apiKeyList[index+1:]...)
+		apiKeyList, apiKey = getRandomKey(apiKeyList)
 
 		log.Println("Request with API token: ", apiKey)
 		client := openai.NewClient(apiKey)
@@ -45,17 +50,14 @@ func ChatCompletion(messages []openai.ChatCompletionMessage, model string) (open
 }
 
 func ChatCompletionStream(messages []openai.ChatCompletionMessage, model string) (*openai.ChatCompletionStream, error) {
-	apiKeyString := os.Getenv("OPENAI_API_KEY")
-	apiKeyList := strings.Split(apiKeyString, "||")
 
 	var stream *openai.ChatCompletionStream
 	var err error
+	var apiKey string
+	var apiKeyList = strings.Split(os.Getenv("OPENAI_API_KEY"), "||")
 
 	for len(apiKeyList) != 0 {
-		rand.Seed(time.Now().UnixNano())
-		index := rand.Intn(len(apiKeyList))
-		apiKey := apiKeyList[index]
-		apiKeyList = append(apiKeyList[:index], apiKeyList[index+1:]...)
+		apiKeyList, apiKey = getRandomKey(apiKeyList)
 
 		log.Println("Request with API token: ", apiKey)
 		client := openai.NewClient(apiKey)
