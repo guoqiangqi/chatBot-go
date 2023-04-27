@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -15,6 +16,24 @@ import (
 )
 
 var jwtSecreteKey = []byte("change your secret key here.")
+var configFilePath = "config/config.json"
+var configData map[string]string
+
+func initConfig() {
+	file, err := os.Open(configFilePath)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+
+	err = decoder.Decode(&configData)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
 
 func authHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -56,7 +75,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func chatCompletionHandler(stream bool) http.HandlerFunc {
+func chatCompletionHandler(stream bool, source string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -97,7 +116,7 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 		systemPayload := []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
-				Content: "You are the openEuler community assistant, your name is XiaoZhi.",
+				Content: configData[source],
 			},
 		}
 		err = json.NewDecoder(r.Body).Decode(&chatPayload)
@@ -189,11 +208,16 @@ func chatCompletionHandler(stream bool) http.HandlerFunc {
 }
 
 func main() {
+	initConfig()
+
 	router := mux.NewRouter()
 
 	router.HandleFunc("/auth", authHandler).Methods("POST")
-	router.HandleFunc("/chatCompletion", chatCompletionHandler(false)).Methods("POST")
-	router.HandleFunc("/chatCompletionStream", chatCompletionHandler(true)).Methods("POST")
+	router.HandleFunc("/chatCompletion", chatCompletionHandler(false, "openEuler")).Methods("POST")
+	router.HandleFunc("/chatCompletionStream", chatCompletionHandler(true, "openEuler")).Methods("POST")
+
+	router.HandleFunc("/chatCompletion-compass", chatCompletionHandler(false, "oss-compass")).Methods("POST")
+	router.HandleFunc("/chatCompletionStream-compass", chatCompletionHandler(true, "oss-compass")).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
