@@ -124,7 +124,7 @@ func chatCompletionHandler(stream bool, source string) http.HandlerFunc {
 		// log.Println(chatPayload.Question)
 		question := chatPayload[len(chatPayload)-1].Content
 		answer := ""
-		dbTableName := source + "_QA"
+		dbTableName := source + "_qa"
 
 		if stream {
 			// completionStream, err := chatbot.ChatCompletionStream(chatPayload, openai.GPT3Dot5Turbo)
@@ -206,11 +206,11 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/auth", authHandler).Methods("POST")
-	router.HandleFunc("/chatCompletion", chatCompletionHandler(false, "openEuler")).Methods("POST")
-	router.HandleFunc("/chatCompletionStream", chatCompletionHandler(true, "openEuler")).Methods("POST")
+	router.HandleFunc("/chatCompletion", chatCompletionHandler(false, "openeuler")).Methods("POST")
+	router.HandleFunc("/chatCompletionStream", chatCompletionHandler(true, "openeuler")).Methods("POST")
 
-	router.HandleFunc("/chatCompletion-compass", chatCompletionHandler(false, "Compass")).Methods("POST")
-	router.HandleFunc("/chatCompletionStream-compass", chatCompletionHandler(true, "Compass")).Methods("POST")
+	router.HandleFunc("/chatCompletion-compass", chatCompletionHandler(false, "compass")).Methods("POST")
+	router.HandleFunc("/chatCompletionStream-compass", chatCompletionHandler(true, "compass")).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
