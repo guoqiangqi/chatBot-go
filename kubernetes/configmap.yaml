@@ -25,6 +25,7 @@ data:
   ADMIN_USERNAME: temporary_user
   ADMIN_PASSWORD: xx
   OPENAI_API_KEY: xx
+  OPENAI_API_SPEC_KEY: xx
   PGSQL_HOST: postgres-service
   PGSQL_PORT: "5432"
   PGSQL_USER: admin

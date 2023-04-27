@@ -26,8 +26,16 @@ func ChatCompletion(messages []openai.ChatCompletionMessage, model string) (open
 	var apiKey string
 	var apiKeyList = strings.Split(os.Getenv("OPENAI_API_KEY"), "||")
 
-	for len(apiKeyList) != 0 {
-		apiKeyList, apiKey = getRandomKey(apiKeyList)
+	specialKey := true
+
+	for len(apiKeyList) != 0 || specialKey {
+
+		if len(apiKeyList) != 0 {
+			apiKeyList, apiKey = getRandomKey(apiKeyList)
+		} else {
+			apiKey = os.Getenv("OPENAI_API_SPEC_KEY")
+			specialKey = false
+		}
 
 		log.Println("Request with API token: ", apiKey)
 		client := openai.NewClient(apiKey)
@@ -56,8 +64,16 @@ func ChatCompletionStream(messages []openai.ChatCompletionMessage, model string)
 	var apiKey string
 	var apiKeyList = strings.Split(os.Getenv("OPENAI_API_KEY"), "||")
 
-	for len(apiKeyList) != 0 {
-		apiKeyList, apiKey = getRandomKey(apiKeyList)
+	specialKey := true
+
+	for len(apiKeyList) != 0 || specialKey {
+
+		if len(apiKeyList) != 0 {
+			apiKeyList, apiKey = getRandomKey(apiKeyList)
+		} else {
+			apiKey = os.Getenv("OPENAI_API_SPEC_KEY")
+			specialKey = false
+		}
 
 		log.Println("Request with API token: ", apiKey)
 		client := openai.NewClient(apiKey)
