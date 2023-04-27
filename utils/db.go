@@ -15,10 +15,9 @@ var (
 	dbUser      = os.Getenv("PGSQL_USER")
 	dbPassword  = os.Getenv("PGSQL_PASSWORD")
 	dbName      = os.Getenv("PGSQL_DBNAME")
-	dbTablename = os.Getenv("PGSQL_TABLENAME")
 )
 
-func WriteQAToDB(question string, answer string) error {
+func WriteQAToDB(question string, answer string, tableName string) error {
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		dbHost, dbPort, dbUser, dbPassword, dbName)
 
@@ -28,12 +27,12 @@ func WriteQAToDB(question string, answer string) error {
 	}
 	defer db.Close()
 
-	_, err = TableInit(db, dbTablename)
+	_, err = TableInit(db, tableName)
 	if err != nil {
 		return err
 	}
 
-	_, err = InsertData(db, dbTablename, question, answer)
+	_, err = InsertData(db, tableName, question, answer)
 	return err
 }
 

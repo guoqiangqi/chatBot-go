@@ -30,4 +30,3 @@ data:
   PGSQL_USER: admin
   PGSQL_PASSWORD: xx
   PGSQL_DBNAME: postgresdb
-  PGSQL_TABLENAME: chatbot

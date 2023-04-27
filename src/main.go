@@ -124,6 +124,7 @@ func chatCompletionHandler(stream bool, source string) http.HandlerFunc {
 		// log.Println(chatPayload.Question)
 		question := chatPayload[len(chatPayload)-1].Content
 		answer := ""
+		dbTableName := source + "_QA"
 
 		if stream {
 			// completionStream, err := chatbot.ChatCompletionStream(chatPayload, openai.GPT3Dot5Turbo)
@@ -153,11 +154,7 @@ func chatCompletionHandler(stream bool, source string) http.HandlerFunc {
 				if errors.Is(err, io.EOF) {
 					log.Println("Stream finished")
 
-					// err = chatbot.WriteQAToDB(question, answer)
-					// if err != nil {
-					// 	log.Println(err)
-					// }
-					go chatbot.WriteQAToDB(question, answer)
+					go chatbot.WriteQAToDB(question, answer, dbTableName)
 
 					return
 				}
@@ -199,11 +196,7 @@ func chatCompletionHandler(stream bool, source string) http.HandlerFunc {
 			w.Write(jsonData)
 		}
 
-		// err = chatbot.WriteQAToDB(question, answer)
-		// if err != nil {
-		// 	log.Println(err)
-		// }
-		go chatbot.WriteQAToDB(question, answer)
+		go chatbot.WriteQAToDB(question, answer, dbTableName)
 	}
 }
 
@@ -216,8 +209,8 @@ func main() {
 	router.HandleFunc("/chatCompletion", chatCompletionHandler(false, "openEuler")).Methods("POST")
 	router.HandleFunc("/chatCompletionStream", chatCompletionHandler(true, "openEuler")).Methods("POST")
 
-	router.HandleFunc("/chatCompletion-compass", chatCompletionHandler(false, "oss-compass")).Methods("POST")
-	router.HandleFunc("/chatCompletionStream-compass", chatCompletionHandler(true, "oss-compass")).Methods("POST")
+	router.HandleFunc("/chatCompletion-compass", chatCompletionHandler(false, "Compass")).Methods("POST")
+	router.HandleFunc("/chatCompletionStream-compass", chatCompletionHandler(true, "Compass")).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
