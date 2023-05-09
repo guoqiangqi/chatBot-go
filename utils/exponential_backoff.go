@@ -19,17 +19,17 @@ func (e *MaxRetryError) Error() string {
 }
 
 type ChatWorkFunc interface {
-	DoChatWork(messages []openai.ChatCompletionMessage, model string) (interface{}, interface{})
+	DoChatWork(messages []openai.ChatCompletionMessage, model string) (interface{}, error)
 }
 
 type ChatCompletionFunc struct{}
 type ChatCompletionStreamFunc struct{}
 
-func (ccf *ChatCompletionFunc) DoChatWork(messages []openai.ChatCompletionMessage, model string) (interface{}, interface{}) {
+func (ccf *ChatCompletionFunc) DoChatWork(messages []openai.ChatCompletionMessage, model string) (interface{}, error) {
 	return ChatCompletion(messages, model)
 }
 
-func (ccsf *ChatCompletionStreamFunc) DoChatWork(messages []openai.ChatCompletionMessage, model string) (interface{}, interface{}) {
+func (ccsf *ChatCompletionStreamFunc) DoChatWork(messages []openai.ChatCompletionMessage, model string) (interface{}, error) {
 	return ChatCompletionStream(messages, model)
 }
 
@@ -55,25 +55,24 @@ func ExponentialBackOff(cwf ChatWorkFunc, initialDelay float64, exponentialBase 
 				return res, nil
 			}
 
-			/*
-				// TODO: Optimize error checking here:
-				// Due to the lack of unified error management for openai RESTful API in the go-openai,
-				// error checking is temporarily disabled here.
-
-				isProvidedError := false
-				for _, value := range errors {
-					if value == err {
-						isProvidedError = true
-						break
-					}
+			e := &openai.APIError{}
+			if errors.As(err, &e) {
+				switch e.HTTPStatusCode {
+				case 401:
+					// invalid auth or key (do not retry)
+					// do nothing, go to return
+				case 429:
+					// rate limiting or engine overload (wait and retry)
+					continue
+				case 500:
+					// openai server error (retry)
+					continue
 				}
-			*/
-			isProvidedError := true
-			if !isProvidedError {
-				// return res, err
-				log.Println("ExponentialBackOff faiiled: ", err)
-				return res, errors.New("something wrong with the internal service")
 			}
+
+			// return res, err
+			log.Println("ExponentialBackOff faiiled: ", err)
+			return res, errors.New("something wrong with the internal service")
 		}
 		return res, &MaxRetryError{"ExponentialBackOff faiiled: Maximum number of retries exceeded."}
 	}
