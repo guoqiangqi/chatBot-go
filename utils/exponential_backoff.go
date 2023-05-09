@@ -35,8 +35,8 @@ func (ccsf *ChatCompletionStreamFunc) DoChatWork(messages []openai.ChatCompletio
 
 // ExponentialBackOff is a function that implements exponential backoff algorithm.
 // It returns an error when the maximum number of retries is reached.
-func ExponentialBackOff(cwf ChatWorkFunc, initialDelay float64, exponentialBase float64, jitter float64, maxRetries int /*, errors []error*/) func(messages []openai.ChatCompletionMessage, model string) (interface{}, interface{}) {
-	return func(messages []openai.ChatCompletionMessage, model string) (interface{}, interface{}) {
+func ExponentialBackOff(cwf ChatWorkFunc, initialDelay float64, exponentialBase float64, jitter float64, maxRetries int /*, errors []error*/) func(messages []openai.ChatCompletionMessage, model string) (interface{}, error) {
+	return func(messages []openai.ChatCompletionMessage, model string) (interface{}, error) {
 		delay := initialDelay
 		var res interface{}
 		for i := 0; i <= maxRetries; i++ {
