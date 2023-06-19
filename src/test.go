@@ -58,7 +58,15 @@ func main() {
 	chatPayload := []openai.ChatCompletionMessage{
 		{
 			Role:    openai.ChatMessageRoleUser,
-			Content: "What is your name.",
+			Content: "请给我推荐一部喜剧。",
+		},
+		{
+			Role:    openai.ChatMessageRoleAssistant,
+			Content: "如果你想看一部轻松愉快的喜剧，我推荐你观看《摔跤吧！爸爸》（Dangal）。",
+		},
+		{
+			Role:    openai.ChatMessageRoleUser,
+			Content: "详细介绍下。",
 		},
 	}
 	chatPayloadBytes, _ := json.Marshal(chatPayload)

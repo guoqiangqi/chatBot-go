@@ -25,10 +25,11 @@ if __name__ == "__main__":
 
     chatURL = baseURL + 'chatCompletion'
     chatHeaders['Authorization'] = 'Bearer' + ' ' + access_token
-    chatPayload = {
-        "role": "user",
-        "content": "介绍下你自己？"
-    },
+    chatPayload = [
+        { "role": "user", "content": "请给我推荐一部喜剧。"},
+        { "role": "assistant", "content": "如果你想看一部轻松愉快的喜剧，我推荐你观看《摔跤吧！爸爸》（Dangal）。"},
+        { "role": "user", "content": "详细介绍下。"},
+        ]
 
     try:
         response = requests.post(url=chatURL, headers=chatHeaders, json=chatPayload)
