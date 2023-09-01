@@ -19,6 +19,8 @@
         params: username=temporary_user&password=default_password
         ```
 
+    ***NOTE:*** The token you obtained has a validity period of 7 days. Please request again after it expires.
+
 2. The both responses should look similar to:
     ```bash
     HTTP/1.1 200 OK
@@ -61,7 +63,7 @@
         }
     ]
     ```
-    **Notice:** If you need to make requests against protected `/chatCompletionStream` endpoints, make "Accept" of http header be "text/event-stream".
+    ***Notice:*** If you need to make requests against protected `/chatCompletionStream` endpoints, make "Accept" of http header be "text/event-stream".
 
 2. Requests to the `chatCompletion` endpoint will get the complete content reponese:
     ```s
@@ -129,9 +131,113 @@
          }
         ```
 
-**Notice:** For other network issues, refer to the general Http protocol.  
+***Notice:*** For other network issues, refer to the general Http protocol.
 
 <br />
+
+## Examples with ***Go***
+```go
+package main
+
+import (
+	"bytes"
+	chatbot "chatbot/utils"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
+
+	openai "github.com/sashabaranov/go-openai"
+)
+
+var baseURL = "http://chatbot-backend.mlops.pub/"
+
+var headers = map[string]string{
+	"Content-Type": "application/json",
+}
+
+func main() {
+
+	// login with username and password, get token from response
+	authURL := baseURL + "auth"
+
+	authPayload := url.Values{
+		"username": {"temporary_user"},
+		"password": {"default_password"},
+	}
+
+	resp, err := http.PostForm(authURL, authPayload)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var authResponse chatbot.ErrorResponse
+		_ = json.NewDecoder(resp.Body).Decode(&authResponse)
+		fmt.Println(authResponse.ErrorMessage)
+		return
+	}
+	var authResponse chatbot.AuthResponse
+	err = json.NewDecoder(resp.Body).Decode(&authResponse)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	accessToken := authResponse.AccessToken
+	fmt.Println(accessToken)
+
+	// request to chatgpt with token
+	chatCompletionURL := baseURL + "chatCompletion"
+	headers["Authorization"] = "Bearer " + accessToken
+
+	// chatPayload type should be  []openai.ChatCompletionMessage
+	chatPayload := []openai.ChatCompletionMessage{
+		{
+			Role:    openai.ChatMessageRoleUser,
+			Content: "What is your name.",
+		},
+	}
+	chatPayloadBytes, _ := json.Marshal(chatPayload)
+
+	req, err := http.NewRequest("POST", chatCompletionURL, bytes.NewBuffer(chatPayloadBytes))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for key, value := range headers {
+		req.Header.Set(key, value)
+	}
+
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var chatResponse chatbot.ErrorResponse
+		_ = json.NewDecoder(resp.Body).Decode(&chatResponse)
+		fmt.Println(chatResponse.ErrorMessage)
+		return
+	}
+
+	var chatResponse chatbot.Answer
+	err = json.NewDecoder(resp.Body).Decode(&chatResponse)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(chatResponse)
+}
+
+```
+
 
 ## Handle SSE stream in ***vue***
 1. Install plugin needed
